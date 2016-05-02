@@ -1,0 +1,106 @@
+{% extends 'layout.html' %} {% block title %}{{ title }}{% endblock %}
+ {% block style %}
+<style>
+  .btn-custom {
+    width: 80%;
+    max-width: 300px;
+    margin: 20px ;
+  }
+  .status{
+    margin: 20px 0px 0px 0px;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="container">
+  <div id="statusText" align="center" class="status"></div>
+  <div align="center">
+    <button id="playbtn" type="button" class="btn btn-default btn-custom">
+      Play/Pause
+    </button>
+  </div>
+  <div align="center">
+    <button id="prevbtn" type="button" class="btn btn-default  btn-custom">
+      Previous
+    </button>
+  </div>
+  <div align="center">
+    <button id="nextbtn" type="button" class="btn btn-default btn-custom">
+      Next
+    </button>
+  </div>
+  <div align="center">
+    <button id="mutebtn" type="button" class="btn btn-default btn-custom">
+      Mute
+    </button>
+  </div>
+  <div align="center">
+    <button id="volumeUpbtn" type="button" class="btn btn-default btn-custom">
+      Volume Up
+    </button>
+  </div>
+  <div align="center">
+    <button id="volumeDownbtn" type="button" class="btn btn-default btn-custom">
+      Volume Down
+    </button>
+  </div>
+</div>
+{% endblock %} {% block script %}
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js" charset="utf-8"></script>
+<script type="text/javascript">
+  $(document).on("pageshow", "[data-role='page']", function () {
+   $('div.ui-loader').remove();
+  });
+  var socket = io.connect('http://{{ ip }}');
+  var interval;
+  socket.on('connect',function(){
+    $('#statusText').html('Sataus:Connect');
+    socket.on('disconnect',function(){
+      $('#statusText').html('Sataus:disconnect');
+    });
+  });
+
+  $('#playbtn').on('click', function() {
+    socket.emit('MediaControl', 'play');
+  });
+  $('#prevbtn').on('click', function() {
+    socket.emit('MediaControl', 'prev');
+  });
+  $('#nextbtn').on('click', function() {
+    socket.emit('MediaControl', 'next');
+  });
+  $('#mutebtn').on('click', function() {
+    socket.emit('MediaControl', 'mute');
+  });
+  $('#volumeUpbtn').on('tap',function () {
+    socket.emit('MediaControl', 'volumeUp');
+  });
+  $('#volumeUpbtn').on('taphold',function () {
+     interval = setInterval(function () {
+       socket.emit('MediaControl', 'volumeUp');
+     },100);
+  });
+  $('#volumeUpbtn').on('vmouseout',function () {
+      window.clearInterval(interval);
+  });
+  $('#volumeUpbtn').on('vmouseup',function () {
+      window.clearInterval(interval);
+  });
+
+  $('#volumeDownbtn').on('tap',function () {
+    socket.emit('MediaControl', 'volumeDown');
+  });
+  $('#volumeDownbtn').on('taphold',function () {
+     interval = setInterval(function () {
+       socket.emit('MediaControl', 'volumeDown');
+     },100);
+  });
+  $('#volumeDownbtn').on('vmouseout',function () {
+      window.clearInterval(interval);
+  });
+  $('#volumeDownbtn').on('vmouseup',function () {
+      window.clearInterval(interval);
+  });
+
+</script>
+{% endblock %}
